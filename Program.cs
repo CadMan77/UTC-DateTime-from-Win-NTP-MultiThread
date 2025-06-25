@@ -25,6 +25,7 @@ class Program
 
         // Start auxiliary thread for NTP requests
         _ = Task.Run(() => ManageNtpThread());
+        //ManageNtpThread();
 
         // Main thread: log last NTP time every 10 seconds
         while (true)
@@ -36,23 +37,20 @@ class Program
 
     static void ManageNtpThread()
     {
-        while (true)
+        try
         {
-            try
+            Thread ntpThread = new Thread(NtpRequestLoop)
             {
-                Thread ntpThread = new Thread(NtpRequestLoop)
-                {
-                    IsBackground = true
-                };
-                ntpThread.Start();
-                ntpThread.Join(); // Wait for thread to exit
-            }
-            catch (Exception ex)
-            {
-                LogMessage($"NTP thread crashed: {ex.Message}");
-            }
-            Thread.Sleep(5000); // Wait before restarting
+                IsBackground = true
+            };
+            ntpThread.Start();
+            ntpThread.Join(); // Wait for thread to exit
         }
+        catch (Exception ex)
+        {
+            LogMessage($"NTP thread crashed: {ex.Message}");
+        }
+        Thread.Sleep(5000); // Wait before restarting
     }
 
     static void NtpRequestLoop()
